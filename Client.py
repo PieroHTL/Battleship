@@ -2,7 +2,7 @@ import socket
 
 def client():
     host =socket.gethostname()
-    port =6000
+    port =6002
 
     client_socket =socket.socket()
     client_socket.connect((host, port))
@@ -19,4 +19,4 @@ def client():
     client_socket.close()
 
 if __name__ == '__main__':
-    client_program()
+    client()
