@@ -9,28 +9,28 @@ class MyServer(QWidget):
         self.setMinimumSize(600,200)
 
         self.tcpServer =QTcpServer()
-        self.tcpServer.newConnection.connect(self.on_new_connection)
+        self.tcpServer.newConnection.connect(self.on_new_connection) #Creates a QTcpServer instance and sets up a signal-slot connection to handle new client connections
         self.tcpServer.listen(port =6002)
 
     def on_new_connection(self):
-        clientConnection =self.tcpServer.nextPendingConnection()
+        clientConnection =self.tcpServer.nextPendingConnection() #Gets the next pending client connection and sets it up to signal-slot connections to handle incoming data and disconnections
         clientConnection.readyRead.connect(self.on_ready_read)
         clientConnection.disconnected.connect(self.on_disconnected)
 
     def on_ready_read(self):
-        clientConnection =self.sender()
+        clientConnection =self.sender() #Grabs the client connection
 
         data =clientConnection.readAll()
-        stream =QDataStream(data, QIODevice.ReadOnly)
-        message_type =stream.readInt32()
-        message =stream.readQString()
+        stream =QDataStream(data, QIODevice.ReadOnly) #Pass down the data and only restrict to only read
+        message_type =stream.readInt32() #Analyse the message type
+        message =stream.readQString() #read
 
         if(message_type ==1):
             print(f"Button clicked: {message}")
 
     def on_disconnected(self):
-        clientConnection =self.sender()
-        clientConnection.deleteLater()
+        clientConnection =self.sender() #Gets the client info, returns a pointer to the object that sent the signal
+        clientConnection.deleteLater() #Deleted the connect client
 
 if(__name__ == "__main__"):
     app =QApplication(sys.argv)
