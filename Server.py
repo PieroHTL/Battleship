@@ -1,38 +1,37 @@
-import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from PyQt6.QtNetwork import QTcpServer, QTcpSocket
-from PyQt6.QtCore import QByteArray, QDataStream, QIODevice
+import socket
+import threading
 
-class MyServer(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setMinimumSize(600,200)
+class MyServer:
+    def __init__(self, host, port):
+        self.host =host
+        self.port =port
+        self.socket =socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.host, self.port))
+        self.socket.listen()
 
-        self.tcpServer =QTcpServer()
-        self.tcpServer.newConnection.connect(self.on_new_connection) #Creates a QTcpServer instance and sets up a signal-slot connection to handle new client connections
-        self.tcpServer.listen(port =6002)
+        print(f"Server started on {self.host}:{self.port}")
 
-    def on_new_connection(self):
-        clientConnection =self.tcpServer.nextPendingConnection() #Gets the next pending client connection and sets it up to signal-slot connections to handle incoming data and disconnections
-        clientConnection.readyRead.connect(self.on_ready_read)
-        clientConnection.disconnected.connect(self.on_disconnected)
+    def run(self):
+        while(True):
+            client_socket, client_address = self.socket.accept()
+            print(f"New client connected: {client_address[0]}:{client_address[1]}")
+            threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
-    def on_ready_read(self):
-        clientConnection =self.sender() #Grabs the client connection
+    def handle_client(self, client_socket):
+        while(True):
+            data =client_socket.recv(1024)
+            if (not data):
+                break
 
-        data =clientConnection.readAll()
-        stream =QDataStream(data, QIODevice.ReadOnly) #Pass down the data and only restrict to only read
-        message_type =stream.readInt32() #Analyse the message type
-        message =stream.readQString() #read
+            x, y = map(int, data.decode().split(','))
+            print(f"Received shot from client {client_socket.getpeername()[0]}: {x}, {y}")
 
-        if(message_type ==1):
-            print(f"Button clicked: {message}")
+            response = "OK"
+            client_socket.send(response.encode())
 
-    def on_disconnected(self):
-        clientConnection =self.sender() #Gets the client info, returns a pointer to the object that sent the signal
-        clientConnection.deleteLater() #Deleted the connect client
+        print(f"Client {client_socket.getpeername()[0]} disconnected")
+        client_socket.close()
 
-if(__name__ == "__main__"):
-    app =QApplication(sys.argv)
-    server =MyServer()
-    sys.exit(app.exec())
+if __name__ == '__main__':
+    server = MyServer('localhost', 6002)
+    server.run()

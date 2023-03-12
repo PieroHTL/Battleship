@@ -1,24 +1,43 @@
 import sys
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtNetwork import QTcpSocket
-from PyQt6.QtCore import QByteArray, QDataStream, QIODevice
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout
+import socket
+import threading
 
-def client():
-    socket = QTcpSocket() #Creates a QTcpSocket instance over TCP/IP
-    socket.connectToHost("localhost", 6002) #Establishes a connection to host
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setMinimumSize(400, 300)
+        layout = QGridLayout()
 
-    data = QByteArray() #Variable will be used to store data
-    stream = QDataStream(data, QIODevice.WriteOnly) #Attaches a data stream to the data variable for writing data
-    stream.writeInt32(1) #Writes an integer to the data stream
-    stream.writeQString("Something has been done :)")
+        self.buttons = []
+        for x in range(10):
+            for y in range(10):
+                button = QPushButton()
+                button.clicked.connect(lambda _, x=x, y=y: self.send_shot(x, y))
+                self.buttons.append(button)
+                layout.addWidget(button, x, y)
 
-    socket.write(data)
-    socket.flush() #Waits until all data in the socket's buffer has been written
-    socket.disconnectFromHost()
-    socket.waitForDisconnected()
+        self.setLayout(layout)
+        self.setWindowTitle("Battleship")
 
-if __name__ == "__main__":
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #add_in =input("Enter add >")
+        #port_in =input("Enter port >")
+        self.socket.connect(('localhost', 6002))
+
+        threading.Thread(target=self.receive_data).start()
+
+    def receive_data(self):
+        while True:
+            data = self.socket.recv(1024)
+            if not data:
+                break
+
+    def send_shot(self, x, y):
+        self.socket.send(f'{x},{y}'.encode())
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    #widget = ()
-    #widget.show()
+    widget = MyWidget()
+    widget.show()
     sys.exit(app.exec())
