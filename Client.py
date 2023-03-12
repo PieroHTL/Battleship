@@ -1,22 +1,24 @@
-import socket
+import sys
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtNetwork import QTcpSocket
+from PyQt6.QtCore import QByteArray, QDataStream, QIODevice
 
-def client():
-    host =socket.gethostname()
-    port =6002
+def Client():
+    socket = QTcpSocket()
+    socket.connectToHost("localhost", 6002)
 
-    client_socket =socket.socket()
-    client_socket.connect((host, port))
+    data = QByteArray()
+    stream = QDataStream(data, QIODevice.WriteOnly)
+    #stream.writeInt32(1)
+    #stream.writeQString()
 
-    message = input(">_")
+    socket.write(data)
+    socket.flush()
+    socket.disconnectFromHost()
+    socket.waitForDisconnected()
 
-    while message.lower().strip() != 'bye':
-        client_socket.send(message.encode())
-        data = client_socket.recv(1024).decode()
-
-        print('Received from server: ' + data)
-        message = input(">_")
-
-    client_socket.close()
-
-if __name__ == '__main__':
-    client()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    #widget = ()
+    #widget.show()
+    sys.exit(app.exec())
