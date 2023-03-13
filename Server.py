@@ -21,7 +21,7 @@ class MyServer:
     def handle_client(self, client_socket):
         while(True):
             data =client_socket.recv(1024)
-            if (not data):
+            if(not data):
                 break
 
             x, y =map(int, data.decode().split(',')) #Parses the received data as x and y coordinates

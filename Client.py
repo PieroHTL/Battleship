@@ -109,9 +109,9 @@ class ButtonField(QWidget):
         threading.Thread(target=self.receive_data).start() #Starts a thread that receives data from the server
 
     def receive_data(self):
-        while True:
+        while(True):
             data =self.socket.recv(1024)
-            if not data:
+            if(not data):
                 break
 
     def send_shot(self, x, y):
