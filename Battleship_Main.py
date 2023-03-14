@@ -3,6 +3,39 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QApplication, QWidget, QPushButton, QLabel, QLineEdit, QGridLayout, QHBoxLayout, QMainWindow, QMessageBox
 )
 
+class LauncherWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Launcher")
+        self.setGeometry(100, 100, 300, 200)
+
+        # Create two buttons
+        self.login_button = QPushButton('Login')
+        self.login_button.clicked.connect(self.login_button_pressed)
+
+        self.register_button = QPushButton('Register')
+      #  self.register_button.clicked.connect(self.register_button_pressed)
+
+        # Create a horizontal layout for the buttons
+        layout = QHBoxLayout()
+        layout.addWidget(self.login_button)
+        layout.addWidget(self.register_button)
+
+        # Create a vertical layout for the window and add the button layout
+
+        self.setLayout(layout)
+
+    def login_button_pressed(self):
+        self.new_window = LoginWindow()
+        self.new_window.show()
+        self.close()
+
+    #def launch_register(self):
+    #    self.new_window = RegisterWindow()
+    #    self.new_window.show()
+    #    self.close()
+
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -82,14 +115,12 @@ class LoginWindow(QWidget):
         self.close()
 
 
-        # opens after login page is closed
-        #self.new_window = MenuWindow()
-        #self.new_window.show()
+
 
 
 # Main
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LoginWindow()
+    window = LauncherWindow()
     window.show()
     sys.exit(app.exec())
